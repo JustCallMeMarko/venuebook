@@ -1,0 +1,187 @@
+/* 1. RESET & BACKGROUND */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+    background-color: #f9f7f2; /* Off-white page background */
+    font-family: 'Inter', sans-serif;
+}
+
+/* 2. NAVIGATION */
+.navbar {
+    padding: 30px 50px;
+}
+
+.logo-img {
+    height: 40px;      /* Adjust this number to make your logo bigger or smaller */
+    width: auto;       /* This ensures the logo doesn't look stretched */
+    display: block;
+    object-fit: contain;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;         /* Space between your image and the word VENUEBOOK */
+}
+
+.logo-icon div {
+    background-color: #999;
+    border-radius: 1px;
+}
+
+.logo-text {
+    font-family: 'Cinzel', serif; /* Applied your requested font */
+    font-weight: 700;
+    font-size: 1.6rem;
+    color: #333;
+    letter-spacing: 1px;
+}
+
+/* 3. MAIN CONTAINER */
+.main-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 0 80px 0;
+}
+
+/* 4. THE SIGNUP CARD */
+.signup-card {
+    background-color: #3f3f3f; /* Dark grey card */
+    color: #ffffff;
+    padding: 45px;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 520px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.signup-card h2 {
+    font-size: 1.7rem;
+    font-weight: 500;
+    margin-bottom: 6px;
+}
+
+.subtitle {
+    color: #b3b3b3;
+    font-size: 0.9rem;
+    margin-bottom: 35px;
+}
+
+.section-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #b3b3b3;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+}
+
+/* 5. ROLE SELECTORS */
+.role-container {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.role-card {
+    flex: 1;
+    border: 1px solid #555;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.role-card.active {
+    background-color: #343d4e; /* Dark blue active state */
+    border-color: #5b7da3;
+}
+
+.role-card .icon {
+    font-size: 1.4rem;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.role-card .role-title {
+    font-size: 0.8rem;
+    color: #ccc;
+}
+
+.role-card.active .role-title {
+    color: #8fa9c7;
+}
+
+/* 6. FORM STYLING */
+.form-row {
+    display: flex;
+    gap: 15px;
+}
+
+.input-group {
+    margin-bottom: 18px;
+    flex: 1;
+}
+
+.input-group label {
+    display: block;
+    font-size: 0.8rem;
+    color: #bbb;
+    margin-bottom: 8px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 14px;
+    background-color: #4a4a4a;
+    border: 1px solid #5a5a5a;
+    border-radius: 8px;
+    color: white;
+    font-size: 0.95rem;
+    outline: none;
+}
+
+.input-group input:focus {
+    border-color: #8fa9c7;
+}
+
+/* 7. BUTTONS & LINKS */
+.forgot-link-wrapper {
+    text-align: right;
+    margin-bottom: 25px;
+}
+
+.forgot-link {
+    color: #8fa9c7;
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 16px;
+    background-color: #d1d1d1;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+.bottom-text {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #aaa;
+}
+
+.bottom-text a {
+    color: #8fa9c7;
+    text-decoration: none;
+}

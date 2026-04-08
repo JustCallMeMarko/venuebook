@@ -1,0 +1,24 @@
+@import url('https://fonts.googleapis.com/css2?family=Anonymous+Pro:ital,wght@0,400;0,700;1,400;1,700&family=Cinzel:wght@400..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+
+:root {
+    --primary-color: #F5F1E8;
+    --secondary-color: #CCCCCC;
+    --background-color: #3E3E3E;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--primary-color);
+    margin: 0;
+}
+
+
+h1,h2,h3 {
+    font-family: "Cinzel", serif;
+}
+p {
+    font-family: 'Open Sans', sans-serif;
+}
