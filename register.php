@@ -11,7 +11,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = trim($_POST['email'] ?? '');
     $phone_num = trim($_POST['phone_num'] ?? '');
     $role_input = $_POST['role'] ?? '';
-    
+
     // Map the selected string to the ENUM values in the USERS table
     $role = 'Customer'; // default
     if ($role_input === 'Venue coordinator') {
@@ -19,9 +19,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } elseif ($role_input === 'Event organizer') {
         $role = 'Customer';
     }
-    
+
     $password = $_POST['password'] ?? '';
-    
+
     if (empty($first_name) || empty($last_name) || empty($email) || empty($password)) {
         $error = "Please fill in all required fields.";
     } else {
@@ -45,33 +45,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VenueBook | Create Account</title>
-    <link rel="icon" type="image/png" href="logo.png">
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="assets/css/register.css">
+    <link rel="stylesheet" href="assets/css/global.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <style>
-        .alert { padding: 10px; margin-bottom: 15px; border-radius: 4px; font-family: 'Inter', sans-serif; font-size: 0.9rem; }
-        .alert-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.5) !important;
+            opacity: 1;
+        }
     </style>
 </head>
-<body>
 
-    <header class="navbar">
-        <div class="logo">
-            <img src="assets/images/Logo.svg" alt="Logo" class="logo-img">
-            <span class="logo-text">VENUEBOOK</span>
-        </div>
-    </header>
-
-    <div class="main-wrapper">
-        <div class="signup-card">
-            <h2>Create your account</h2>
-            <p class="subtitle">Get started — it's free to register</p>
+<body class="bgs-primary">
+    <div class="bgs-primary d-flex align-items-center justify-content-center vh-100">
+        <div class="bgs-background p-4 rounded-2 col-11 col-sm-10 col-md-8 col-lg-6 col-xl-4 col-xxl-3">
+            <h2 class="font-open text-white m-0 h4">Create your account</h2>
+            <p class="font-open text-white opacity-75 fs-6">Get started — it's free to register</p>
 
             <?php if (!empty($error)): ?>
                 <div class="alert alert-error"><?= htmlspecialchars($error) ?></div>
@@ -80,67 +94,71 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
             <?php endif; ?>
 
-            <p class="section-label">I am a</p>
-            <div class="role-container">
-                <div class="role-card active" data-role="Event organizer" onclick="selectRole(this)">
-                    <span class="icon">📁</span>
-                    <span class="role-title">Event organizer</span>
+            <p class="font-open text-white mt-2 mb-2 fw-semibold opacity-75" style="font-size: 12px;">I AM A</p>
+            <div class="row">
+                <div class="col-6 mb-3">
+                    <div style="cursor: pointer; --bs-border-opacity: .5;" class="role-card d-flex p-3 flex-column align-items-center border border-primary bg-primary bg-opacity-25 rounded h-100" data-role="Event organizer" onclick="selectRole(this)">
+                        <span>📁</span>
+                        <span class="font-open text-center fw-medium text-light mt-2" style="font-size: 12px;">Event organizer</span>
+                    </div>
                 </div>
-                <div class="role-card" data-role="Venue coordinator" onclick="selectRole(this)">
-                    <span class="icon">🏢</span>
-                    <span class="role-title">Venue coordinator</span>
+                <div class="col-6 mb-3">
+                    <div style="cursor: pointer; --bs-border-opacity: .5;" class="role-card d-flex p-3 flex-column align-items-center border rounded h-100" data-role="Venue coordinator" onclick="selectRole(this)">
+                        <span>🏢</span>
+                        <span class="font-open text-center fw-medium text-light mt-2" style="font-size: 12px;">Venue coordinator</span>
+                    </div>
                 </div>
             </div>
 
             <form action="register.php" method="POST">
                 <input type="hidden" name="role" id="role_input" value="Event organizer">
-                <div class="form-row">
-                    <div class="input-group">
-                        <label>First Name</label>
-                        <input type="text" name="first_name" placeholder="Juan" required>
+                <div class="row mb-2">
+                    <div class="col-6">
+                        <label for="exampleInputFirstName" class="form-label font-open text-white mb-2 fw-semibold opacity-75" style="font-size: 12px;">First Name</label>
+                        <input type="text" class="form-control bg-transparent text-white border-light" style="--bs-border-opacity: .5;" id="exampleInputFirstName" name="first_name" placeholder="Juan" required>
                     </div>
-                    <div class="input-group">
-                        <label>Last Name</label>
-                        <input type="text" name="last_name" placeholder="Cruz" required>
+                    <div class="col-6">
+                        <label for="exampleInputLastName" class="form-label font-open text-white mb-2 fw-semibold opacity-75" style="font-size: 12px;">Last Name</label>
+                        <input type="text" class="form-control bg-transparent text-white border-light" style="--bs-border-opacity: .5;" id="exampleInputLastName" name="last_name" placeholder="Dela Cruz" required>
                     </div>
                 </div>
-
-                <div class="input-group">
-                    <label>Email Address</label>
-                    <input type="email" name="email" placeholder="you@company.com" required>
+                <div class="mb-2">
+                    <label for="exampleInputEmail" class="form-label font-open text-white mb-2 fw-semibold opacity-75" style="font-size: 12px;">Email address</label>
+                    <input type="email" class="form-control bg-transparent text-white border-light" style="--bs-border-opacity: .5;" id="exampleInputEmail" name="email" placeholder="juan.delacruz@example.com" required>
                 </div>
-
-                <div class="input-group">
-                    <label>Phone Number</label>
-                    <input type="text" name="phone_num" placeholder="09123456789">
+                <div class="mb-2">
+                    <label for="exampleInputPhone" class="form-label font-open text-white mb-2 fw-semibold opacity-75" style="font-size: 12px;">Phone Number</label>
+                    <input type="tel" class="form-control bg-transparent text-white border-light" style="--bs-border-opacity: .5;" id="exampleInputPhone" name="phone_num" placeholder="123-456-7890" required>
                 </div>
-
-                <div class="input-group">
-                    <label>Password</label>
-                    <input type="password" name="password" placeholder="********" required>
+                <div class="mb-2">
+                    <label for="exampleInputPassword1" class="form-label font-open text-white mb-2 fw-semibold opacity-75" style="font-size: 12px;">Password</label>
+                    <input type="password" class="form-control bg-transparent text-white border-light" style="--bs-border-opacity: .5;" id="exampleInputPassword1" name="password" placeholder="********" required>
                 </div>
-
-                <div class="forgot-link-wrapper">
-                    <a href="#" class="forgot-link">Forgot Password?</a>
-                </div>
-
-                <button type="submit" class="submit-btn">Create account</button>
+                <button type="submit" class="btn btn-light w-100 mt-4">Submit</button>
             </form>
 
-            <p class="bottom-text">Already have an account? <a href="login.php">Login</a></p>
+            <p class="font-open text-white text-center mt-2 mb-0 fw-semibold opacity-75" style="font-size: 12px;">Already have an account? <a href="login.php" class="text-decoration-none" style="color: #79A6CC;">Login</a></p>
         </div>
     </div>
 
     <script>
         function selectRole(element) {
             document.querySelectorAll('.role-card').forEach(card => {
-                card.classList.remove('active');
+                card.classList.remove('border-primary', 'bg-primary', 'bg-opacity-25');
+                card.classList.add('border', 'border-light');
             });
-            element.classList.add('active');
+            element.classList.remove('border-light');
+            element.classList.add('border', 'border-primary', 'bg-primary', 'bg-opacity-25');
             // Update the hidden input field based on the selected role
             document.getElementById('role_input').value = element.getAttribute('data-role');
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const selected = document.querySelector('.role-card[data-role="Event organizer"]');
+            if (selected) selectRole(selected);
+        });
     </script>
 
 </body>
+
 </html>
