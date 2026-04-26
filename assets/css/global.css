@@ -10,15 +10,34 @@
     box-sizing: border-box;
 }
 
-body {
+html, body {
     background-color: var(--primary-color);
     margin: 0;
 }
 
-
-h1,h2,h3 {
-    font-family: "Cinzel", serif;
+/* FONTS */
+.font-cinzel {
+    font-family: 'Cinzel', sans-serif;
 }
-p {
+.font-open {
     font-family: 'Open Sans', sans-serif;
+}
+
+/* BACKGROUNDS */
+.bgs-primary {
+    background-color: var(--primary-color);
+}
+
+.bgs-secondary {
+    background-color: var(--secondary-color);
+}
+
+.bgs-background {
+    background-color: var(--background-color);
+}
+
+@media (min-width: 992px) {
+  .w-lg-50 {
+    width: 50% !important;
+  }
 }

@@ -2,9 +2,6 @@
 
 ```
 venuebook/
-├── actions/
-│   └── post and get scripts like login and register
-│
 ├── includes/
 │   ├── auth.php            # session_start() + role-based redirect guard
 │   ├── header.php          # shared <nav> HTML -- not finalized
