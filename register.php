@@ -134,7 +134,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <label for="exampleInputPassword1" class="form-label font-open text-white mb-2 fw-semibold opacity-75" style="font-size: 12px;">Password</label>
                     <input type="password" class="form-control bg-transparent text-white border-light" style="--bs-border-opacity: .5;" id="exampleInputPassword1" name="password" placeholder="********" required>
                 </div>
-                <button type="submit" class="btn btn-light w-100 mt-4">Submit</button>
+                <button type="submit" class="btn btn-light w-100 mt-4">Create Account</button>
             </form>
 
             <p class="font-open text-white text-center mt-2 mb-0 fw-semibold opacity-75" style="font-size: 12px;">Already have an account? <a href="login.php" class="text-decoration-none" style="color: #79A6CC;">Login</a></p>

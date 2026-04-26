@@ -81,7 +81,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <input type="password" class="form-control bg-transparent text-white border-light" style="--bs-border-opacity: .5;" id="exampleInputPassword1" name="password" placeholder="********" required>
                 </div>
                 <a href="#" class="text-decoration-none d-block text-end fw-semibold" style="font-size: 12px; color: #79A6CC;">Forgot Password?</a>
-                <button type="submit" class="btn btn-light w-100 mt-4">Submit</button>
+                <button type="submit" class="btn btn-light w-100 mt-4">Sign In</button>
             </form>
 
             <p class="font-open text-white text-center mt-2 mb-0 fw-semibold opacity-75" style="font-size: 12px;">Don't have an account? <a href="register.php" class="text-decoration-none" style="color: #79A6CC;">Register</a></p>
