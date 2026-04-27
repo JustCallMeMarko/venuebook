@@ -10,7 +10,8 @@
     box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
     background-color: var(--primary-color);
     margin: 0;
 }
@@ -19,6 +20,7 @@ html, body {
 .font-cinzel {
     font-family: 'Cinzel', sans-serif;
 }
+
 .font-open {
     font-family: 'Open Sans', sans-serif;
 }
@@ -36,8 +38,32 @@ html, body {
     background-color: var(--background-color);
 }
 
+.sidebar-selected {
+    color: #A67C52;
+    border-left: #A67C52 3px solid;
+    background-color: #a67c5222;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+
+.sidebar-link {
+    color: #3e3e3eb6;
+}
+
+.sidebar-link:hover {
+    background-color: #3e3e3e14;
+    border-radius: 6px;
+}
+
+
 @media (min-width: 992px) {
-  .w-lg-50 {
-    width: 50% !important;
-  }
+    .w-lg-50 {
+        width: 50% !important;
+    }
+
+    .custom-sidebar {
+        max-width: 320px !important;
+        height: 100vh;
+        overflow-y: auto;
+    }
 }
