@@ -55,6 +55,36 @@ body {
     border-radius: 6px;
 }
 
+.sidebar-icon {
+    display: inline-block;
+    flex: 0 0 auto;
+    width: 16px;
+    height: 16px;
+    background-color: currentColor;
+    -webkit-mask-position: center;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-size: contain;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: contain;
+}
+
+.sidebar-icon-dashboard {
+    -webkit-mask-image: url('/venuebook/assets/images/Dashboard.svg');
+    mask-image: url('/venuebook/assets/images/Dashboard.svg');
+}
+
+.sidebar-icon-venue {
+    -webkit-mask-image: url('/venuebook/assets/images/Venue.svg');
+    mask-image: url('/venuebook/assets/images/Venue.svg');
+}
+
+.sidebar-icon-booking {
+    -webkit-mask-image: url('/venuebook/assets/images/Booking.svg');
+    mask-image: url('/venuebook/assets/images/Booking.svg');
+}
+
+
 
 @media (min-width: 992px) {
     .w-lg-50 {

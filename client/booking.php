@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="/venuebook/assets/css/global.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="icon" href="/venuebook/favicon.ico" type="image/x-icon">
-    <title>VenueBook Client Dashboard</title>
+    <title>VenueBook Client Booking</title>
 </head>
 
 <body class="bgs-primary">
@@ -25,13 +25,13 @@
 
             <nav class="collapse d-lg-flex flex-column h-100 justify-content-between w-100" id="mobileNav">
                 <div class="d-flex flex-column gap-2 pt-2 pb-3 border-bottom border-dark-subtle">
-                    <a href="/venuebook/client/dashboard.php" class="sidebar-selected p-2 text-decoration-none fw-semibold d-inline-flex align-items-center">
+                    <a href="/venuebook/client/dashboard.php" class="sidebar-link p-2 text-decoration-none fw-semibold d-inline-flex align-items-center">
                         <span class="sidebar-icon sidebar-icon-dashboard me-2" aria-hidden="true"></span>
                         Dashboard</a>
                     <a href="/venuebook/client/venue.php" class="sidebar-link p-2 text-decoration-none fw-semibold d-inline-flex align-items-center">
                         <span class="sidebar-icon sidebar-icon-venue me-2" aria-hidden="true"></span>
                         Venue</a>
-                    <a href="/venuebook/client/booking.php" class="sidebar-link p-2 text-decoration-none fw-semibold d-inline-flex align-items-center">
+                    <a href="/venuebook/client/booking.php" class="sidebar-selected p-2 text-decoration-none fw-semibold d-inline-flex align-items-center">
                         <span class="sidebar-icon sidebar-icon-booking me-2" aria-hidden="true"></span>
                         Booking</a>
                 </div>
