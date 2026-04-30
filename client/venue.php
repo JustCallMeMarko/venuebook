@@ -37,7 +37,7 @@
                 </div>
 
                 <div class="pt-3 mt-lg-auto">
-                    <div class="d-flex align-items-center w-100 justify-content-between sidebar-link p-2" style="cursor: pointer;">
+                    <div class="d-flex align-items-center w-100 justify-content-between sidebar-link p-2" style="cursor: pointer;" onclick="document.location.href = '/venuebook/client/settings.php';">
                         <div class="d-flex align-items-center">
                             <img src="/venuebook/assets/images/person.svg" alt="User Icon" width="40" height="40" class="me-2 bg-dark rounded-1">
                             <div>
