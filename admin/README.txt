@@ -1,1 +1,0 @@
-add here the admin pages
