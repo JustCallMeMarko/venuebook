@@ -100,14 +100,14 @@
                         <div class="h-100 d-flex flex-column bg-light p-3 rounded-3">
                             <h3 class="font-open fw-semibold">Browse & check availability</h3>
                             <p class="font-open fw-medium">Search venues by capacity, location, and event type. View real-time availability calendars to find open dates instantly.</p>
-                            <img src="assets/images/card1.png" alt="Feature Card Image 1">
+                            <img src="assets/images/Card1.png" alt="Feature Card Image 1">
                         </div>
                     </div>
                     <div class="col-12 col-md-6 mb-4">
                         <div class="h-100 d-flex flex-column bg-light p-3 rounded-3">
                             <h3 class="font-open fw-semibold">Pick a bundle</h3>
                             <p class="font-open fw-medium">Choose a pre-built package that combines the venue's AV setup with a catering service. One place, one booking.</p>
-                            <img src="assets/images/card2.png" alt="Feature Card Image 2">
+                            <img src="assets/images/Card2.png" alt="Feature Card Image 2">
                         </div>
                     </div>
                     <div class="col-12">
