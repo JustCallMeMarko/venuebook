@@ -1,6 +1,6 @@
 <?php
 $host = "localhost"; // change to the deployed db
-$db_name = "venuebook"; // change to the deployed db
+$db_name = "4747619_venuebook"; // change to the deployed db
 $username = "root"; // change to the deployed db
 $password = ""; // change to the deployed db
 $conn = "";
