@@ -97,7 +97,7 @@ $notif_url = '/venuebook/shared/Notifications.php';
                         <div class="d-flex align-items-center gap-2">
                             <img src="/venuebook/assets/images/person.svg" alt="" width="40" height="40" class="bg-dark rounded-1" aria-hidden="true">
                             <div>
-                                <h6 class="mb-0 font-mont"><?= htmlspecialchars(($_SESSION['first_name'] ?? '') . ' ' . ($_SESSION['last_name'] ?? '')) ?></h6>
+                                <h6 class="mb-0 font-mont fw-semibold"><?= htmlspecialchars(($_SESSION['first_name'] ?? '') . ' ' . ($_SESSION['last_name'] ?? '')) ?></h6>
                                 <p class="mb-0 font-mont" style="font-size:12px;">
                                     <?= ($_SESSION['role'] ?? '') === 'admin' ? 'Administrator' : 'Event Organizer' ?>
                                 </p>
