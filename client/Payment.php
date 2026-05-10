@@ -1,7 +1,4 @@
 <?php
-session_start();
-
-// Include nav config
 include __DIR__ . '/../config/nav.php';
 
 // $nav_items  = $nav_config[$_SESSION['role']] ?? [];
