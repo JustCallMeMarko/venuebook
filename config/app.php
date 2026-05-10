@@ -9,4 +9,7 @@ define('SESSION_LIFETIME', 60 * 60 * 24 * 30);
 
 define('DEPOSIT_PERCENT', 50);
 define('DEPOSIT_DEADLINE_DAYS', 7);
+
+define('ROLE_ADMIN',  'admin');
+define('ROLE_CLIENT', 'client');
 ?>
