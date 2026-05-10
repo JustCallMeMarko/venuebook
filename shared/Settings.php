@@ -57,6 +57,7 @@ try {
 }
 
 require_once __DIR__ . '/../includes/top_sidebar.php';
+require_any_role(['admin', 'client']);
 ?>
 
 <div class="col-12 col-lg-9 p-1 mx-auto">

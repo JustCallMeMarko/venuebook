@@ -1,13 +1,12 @@
 <?php
 require_once __DIR__ . '/../includes/auth.php';
-require_once __DIR__ . '/../includes/helpers.php';
 
 http_response_code(403);
 
 if (is_logged_in()) {
     $dashboard = is_admin()
-        ? BASE_URL . '/admin/dashboard.php'
-        : BASE_URL . '/client/dashboard.php';
+        ? BASE_URL . '/admin/index.php'
+        : BASE_URL . '/client/index.php';
 } else {
     $dashboard = BASE_URL . '/login.php';
 }
