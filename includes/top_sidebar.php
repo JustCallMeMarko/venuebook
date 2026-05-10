@@ -1,7 +1,9 @@
 <?php
+require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/../config/nav.php';
 $page_title   = $page_title   ?? 'VenueBook';
 $active_nav   = $active_nav   ?? '';
-$nav_items    = $nav_items    ?? [];
+$nav_items  = $nav_config[$_SESSION['role']] ?? [];
 $settings_url = '/venuebook/shared/Settings.php';
 $notif_url = '/venuebook/shared/Notifications.php';
 ?>
