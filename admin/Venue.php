@@ -1,8 +1,6 @@
 <?php
 include __DIR__ . '/../config/nav.php';
 
-// $nav_items  = $nav_config[$_SESSION['role']] ?? [];
-$nav_items  = $nav_config["admin"] ?? [];
 $active_nav = 'Venue';  
 $page_title = 'Venue';
 
