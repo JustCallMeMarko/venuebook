@@ -13,9 +13,11 @@ include __DIR__ . '/../includes/top_sidebar.php';
 <style>
     :root {
         --accent-red: #B23B3B;
-        --gold-accent: #C19A6B;
+        --accent-gold: #A67C52;
         --navy-dark: #0A1128;
     }
+    .member-portal-tag { font-size: 10px; font-weight: 800; color: var(--accent-gold); letter-spacing: 1px; }
+
     .font-playfair { font-family: 'Playfair Display', serif; }
 
     /* Admin Stat Cards */
@@ -50,12 +52,13 @@ include __DIR__ . '/../includes/top_sidebar.php';
 
 <div class="container-fluid">
     <!-- Header Section -->
-    <div class="d-md-flex justify-content-between align-items-center mb-5">
+    <div class="d-md-flex justify-content-between align-items-end mb-4 gap-3">
         <div>
-            <div class="stat-label mb-1">Event Administration</div>
-            <h2 class="display-6 fw-normal font-playfair">Booking Approvals</h2>
+            <span class="member-portal-tag text-uppercase">Booking</span>
+            <h1 class="font-cinzel display-5 fw-bold text-navy mt-1">Booking Management</h1>
+            <p class="text-muted mb-0">Manage all booking requests and approvals.</p>
         </div>
-        <div class="d-flex gap-2 mt-3 mt-md-0">
+         <div class="d-flex gap-2 mt-3 mt-md-0">
             <input type="text" class="form-control" placeholder="Search Ref or Client..." style="max-width: 250px;">
             <button class="btn btn-outline-secondary btn-sm px-3">Date Range</button>
         </div>

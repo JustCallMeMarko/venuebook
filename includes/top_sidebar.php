@@ -14,6 +14,7 @@ $notif_url = '/venuebook/shared/Notifications.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/venuebook/assets/css/global.css">
+    <link rel="stylesheet" href="/venuebook/assets/css/venuebook.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     <link rel="icon" href="/venuebook/favicon.ico" type="image/x-icon">
     <title><?= htmlspecialchars($page_title) ?> — VenueBook</title>

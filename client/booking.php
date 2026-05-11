@@ -13,8 +13,9 @@ include __DIR__ . '/../includes/top_sidebar.php';
     :root {
         --bg-cream: #f8f6f1;
         --navy: #0e1b2d;
-        --accent-gold: #8e734b;
+        --accent-gold: #A67C52;
     }
+    .text-tag { font-size: 10px; font-weight: 800; color: var(--accent-gold); letter-spacing: 1px; }
     .font-cinzel { font-family: 'Cinzel', serif; }
     
     /* Booking Card Styles */
@@ -57,10 +58,11 @@ include __DIR__ . '/../includes/top_sidebar.php';
 
 <div class="container-fluid">
     <!-- Page Header -->
-    <header class="mb-5">
-        <h1 class="font-cinzel display-6 fw-bold text-navy">My Bookings</h1>
-        <p class="text-muted">Manage your corporate events, track payment deadlines, and finalize contracts.</p>
-    </header>
+    <div class="mb-4">
+            <span class="text-tag text-uppercase">Booking</span>
+            <h1 class="font-cinzel display-5 fw-bold mt-1">My Bookings</h1>
+            <p class="text-secondary mb-0">Manage your corporate events, track payment deadlines, and finalize contracts.</p>
+    </div>
 
     <div class="row g-4">
         <!-- Left: Booking List -->

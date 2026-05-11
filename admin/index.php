@@ -4,7 +4,7 @@ require_role('admin');
 
 include __DIR__ . '/../config/nav.php';
 
-$active_nav = 'Dashboard';  
+$active_nav = 'Dashboard';
 $page_title = 'Dashboard';
 
 include __DIR__ . '/../includes/top_sidebar.php';
@@ -16,8 +16,12 @@ include __DIR__ . '/../includes/top_sidebar.php';
         --accent-gold: #A67C52;
         --bg-cream: #F9F7F2;
     }
-    .font-cinzel { font-family: 'Cinzel', serif; }
-    
+    .member-portal-tag { font-size: 10px; font-weight: 800; color: var(--accent-gold); letter-spacing: 1px; }
+
+    .font-cinzel {
+        font-family: 'Cinzel', serif;
+    }
+
     /* Admin Stat Cards */
     .stat-card {
         background: #ffffff;
@@ -26,9 +30,21 @@ include __DIR__ . '/../includes/top_sidebar.php';
         padding: 20px;
         transition: transform 0.2s;
     }
-    .stat-label { font-size: 11px; font-weight: 700; color: #777; text-transform: uppercase; letter-spacing: 1px; }
-    .stat-value { font-size: 28px; font-weight: 600; color: var(--navy); }
-    
+
+    .stat-label {
+        font-size: 11px;
+        font-weight: 700;
+        color: #777;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .stat-value {
+        font-size: 28px;
+        font-weight: 600;
+        color: var(--navy);
+    }
+
     /* Section Cards */
     .section-card {
         background: #fff;
@@ -36,25 +52,53 @@ include __DIR__ . '/../includes/top_sidebar.php';
         border-radius: 12px;
         padding: 24px;
     }
-    .chart-container { height: 250px; position: relative; }
+
+    .chart-container {
+        height: 250px;
+        position: relative;
+    }
 
     /* Custom Table Styling */
-    .bookings-table th { font-size: 11px; text-transform: uppercase; color: #888; border-bottom: 2px solid #f8f9fa; }
-    .venue-tag { background: #f9f1e8; color: var(--accent-gold); padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; }
-    
+    .bookings-table th {
+        font-size: 11px;
+        text-transform: uppercase;
+        color: #888;
+        border-bottom: 2px solid #f8f9fa;
+    }
+
+    .venue-tag {
+        background: #f9f1e8;
+        color: var(--accent-gold);
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
     /* Alert Dots */
-    .alert-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-    .dot-warn { background: var(--accent-gold); }
-    .dot-ok { background: #2e7d52; }
+    .alert-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .dot-warn {
+        background: var(--accent-gold);
+    }
+
+    .dot-ok {
+        background: #2e7d52;
+    }
 </style>
 
 <div class="container-fluid">
     <!-- Header Section -->
-    <header class="mb-4">
-        <h1 class="font-cinzel display-6 fw-bold text-navy">Portfolio Overview</h1>
-        <p class="text-muted">Comprehensive analytics on performance of bookings, payments, and venue utilization</p>
-    </header>
-
+    <div class="mb-4">
+        <span class="member-portal-tag text-uppercase">Dashboard</span>
+        <h1 class="font-cinzel display-5 fw-bold text-navy mt-1">Portfolio Overview</h1>
+        <p class="text-muted mb-0">Comprehensive analytics on performance of bookings, payments, and venue utilization.</p>
+    </div>
     <!-- Top Stats Row -->
     <div class="row g-3 mb-4">
         <div class="col-12 col-md-4">
@@ -105,7 +149,7 @@ include __DIR__ . '/../includes/top_sidebar.php';
                     <h3 class="h6 fw-bold mb-0">System Alerts</h3>
                     <span class="badge bg-danger rounded-pill">4</span>
                 </div>
-                
+
                 <div class="d-flex gap-3 mb-3 pb-3 border-bottom border-light">
                     <span class="alert-dot dot-warn mt-2"></span>
                     <div>
@@ -202,8 +246,16 @@ include __DIR__ . '/../includes/top_sidebar.php';
         },
         options: {
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true } }
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
         }
     });
 </script>
