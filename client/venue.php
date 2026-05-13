@@ -16,9 +16,11 @@ $items_per_page = 6;
 $total_pages = ceil($total_items / $items_per_page);
 
 // Get current page from URL, default to 1
-$current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-if ($current_page < 1) $current_page = 1;
-if ($current_page > $total_pages) $current_page = $total_pages;
+$current_page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
+if ($current_page < 1)
+    $current_page = 1;
+if ($current_page > $total_pages)
+    $current_page = $total_pages;
 
 // Calculate the offset for a SQL query
 // Example: SELECT * FROM venues LIMIT $items_per_page OFFSET $offset
@@ -116,7 +118,8 @@ $offset = ($current_page - 1) * $items_per_page;
         </div>
         <div class="position-relative" style="max-width: 400px; width: 100%;">
             <i class="fas fa-search search-icon"></i>
-            <input type="text" class="form-control search-bar shadow-sm" placeholder="Search venues, events, locations...">
+            <input type="text" class="form-control search-bar shadow-sm"
+                placeholder="Search venues, events, locations...">
         </div>
     </div>
 
@@ -180,13 +183,21 @@ $offset = ($current_page - 1) * $items_per_page;
 
                     <div class="card-body p-4 pt-2">
                         <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h3 class="h6 fw-bold mb-0 text-navy" style="max-width: 70%;"><?= $venue['name'] ?></h3>
-                            <span class="fw-bold text-navy"><?= $venue['price'] ?></span>
+                            <h3 class="h6 fw-bold mb-0 text-navy" style="max-width: 70%;">
+                                <?= $venue['name'] ?>
+                            </h3>
+                            <span class="fw-bold text-navy">
+                                <?= $venue['price'] ?>
+                            </span>
                         </div>
 
                         <div class="small text-secondary mb-3">
-                            <div class="mb-1"><i class="fas fa-map-marker-alt text-gold me-2"></i> <?= $venue['location'] ?></div>
-                            <div class="text-gold fw-bold"><i class="fas fa-star me-1"></i> <?= $venue['rating'] ?></div>
+                            <div class="mb-1"><i class="fas fa-map-marker-alt text-gold me-2"></i>
+                                <?= $venue['location'] ?>
+                            </div>
+                            <div class="text-gold fw-bold"><i class="fas fa-star me-1"></i>
+                                <?= $venue['rating'] ?>
+                            </div>
                         </div>
 
                         <hr class="text-light">
@@ -207,7 +218,8 @@ $offset = ($current_page - 1) * $items_per_page;
 
         <!-- Previous Button -->
         <li class="page-item <?= ($current_page <= 1) ? 'disabled' : '' ?>">
-            <a class="page-link border-0 shadow-sm text-navy" href="?page=<?= $current_page - 1 ?>" aria-label="Previous">
+            <a class="page-link border-0 shadow-sm text-navy" href="?page=<?= $current_page - 1 ?>"
+                aria-label="Previous">
                 <span aria-hidden="true">&laquo; Previous</span>
             </a>
         </li>
