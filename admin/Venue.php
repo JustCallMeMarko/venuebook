@@ -16,77 +16,113 @@ $user_id = $user['user_id'];
 $success = '';
 $errors = [];
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_venue'])) {
-    $name = trim($_POST['venue_name'] ?? '');
-    $description = trim($_POST['venue_description'] ?? '');
-    $location = trim($_POST['venue_location'] ?? '');
-    $capacity = (int) ($_POST['venue_capacity'] ?? 0);
-    $price = trim($_POST['venue_price'] ?? '');
-    $status = in_array($_POST['venue_status'] ?? '', ['active', 'inactive'], true) ? $_POST['venue_status'] : 'active';
+$page = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
+$items_per_page = 5;
 
-    $package_name = trim($_POST['package_name'] ?? '');
-    $package_price = trim($_POST['package_price'] ?? '');
-    $package_inclusions = trim($_POST['package_inclusions'] ?? '');
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['add_venue'])) {
+        $name = trim($_POST['venue_name'] ?? '');
+        $description = trim($_POST['venue_description'] ?? '');
+        $location = trim($_POST['venue_location'] ?? '');
+        $capacity = (int) ($_POST['venue_capacity'] ?? 0);
+        $price = trim($_POST['venue_price'] ?? '');
+        $status = in_array($_POST['venue_status'] ?? '', ['active', 'inactive'], true) ? $_POST['venue_status'] : 'active';
 
-    if ($name === '') {
-        $errors[] = 'Venue name is required.';
-    }
-    if ($location === '') {
-        $errors[] = 'Venue location is required.';
-    }
-    if ($capacity <= 0) {
-        $errors[] = 'Venue capacity must be greater than 0.';
-    }
-    if ($price === '' || !is_numeric($price) || (float) $price < 0) {
-        $errors[] = 'A valid price per day is required.';
-    }
-    if ($package_name === '') {
-        $errors[] = 'Package name is required.';
-    }
-    if ($package_price === '' || !is_numeric($package_price) || (float) $package_price < 0) {
-        $errors[] = 'A valid package price is required.';
-    }
+        $package_name = trim($_POST['package_name'] ?? '');
+        $package_price = trim($_POST['package_price'] ?? '');
+        $package_inclusions = trim($_POST['package_inclusions'] ?? '');
 
-    if (empty($errors)) {
-        try {
-            $conn->beginTransaction();
+        if ($name === '') {
+            $errors[] = 'Venue name is required.';
+        }
+        if ($location === '') {
+            $errors[] = 'Venue location is required.';
+        }
+        if ($capacity <= 0) {
+            $errors[] = 'Venue capacity must be greater than 0.';
+        }
+        if ($price === '' || !is_numeric($price) || (float) $price < 0) {
+            $errors[] = 'A valid price per day is required.';
+        }
+        if ($package_name === '') {
+            $errors[] = 'Package name is required.';
+        }
+        if ($package_price === '' || !is_numeric($package_price) || (float) $package_price < 0) {
+            $errors[] = 'A valid package price is required.';
+        }
 
-            $venue_stmt = $conn->prepare('INSERT INTO venue (User_id, Name, Description, Location, Capacity, Price_per_day, Status) VALUES (?, ?, ?, ?, ?, ?, ?)');
-            $venue_stmt->execute([
-                $user_id,
-                $name,
-                $description,
-                $location,
-                $capacity,
-                $price,
-                $status,
-            ]);
+        if (empty($errors)) {
+            try {
+                $conn->beginTransaction();
 
-            $venue_id = $conn->lastInsertId();
+                $venue_stmt = $conn->prepare('INSERT INTO venue (User_id, Name, Description, Location, Capacity, Price_per_day, Status) VALUES (?, ?, ?, ?, ?, ?, ?)');
+                $venue_stmt->execute([
+                    $user_id,
+                    $name,
+                    $description,
+                    $location,
+                    $capacity,
+                    $price,
+                    $status,
+                ]);
 
-            $package_stmt = $conn->prepare('INSERT INTO packages (Venue_id, Name, Price, Status) VALUES (?, ?, ?, ?)');
-            $package_stmt->execute([
-                $venue_id,
-                $package_name,
-                $package_price,
-                'active',
-            ]);
+                $venue_id = $conn->lastInsertId();
 
-            $package_id = $conn->lastInsertId();
+                $package_stmt = $conn->prepare('INSERT INTO packages (Venue_id, Name, Price, Status) VALUES (?, ?, ?, ?)');
+                $package_stmt->execute([
+                    $venue_id,
+                    $package_name,
+                    $package_price,
+                    'active',
+                ]);
 
-            if ($package_inclusions !== '') {
-                $inclusions = array_filter(array_map('trim', explode(',', $package_inclusions)));
-                $inclusion_stmt = $conn->prepare('INSERT INTO inclusions (package_id, inclusion) VALUES (?, ?)');
-                foreach ($inclusions as $inclusion) {
-                    $inclusion_stmt->execute([$package_id, $inclusion]);
+                $package_id = $conn->lastInsertId();
+
+                if ($package_inclusions !== '') {
+                    $inclusions = array_filter(array_map('trim', explode(',', $package_inclusions)));
+                    $inclusion_stmt = $conn->prepare('INSERT INTO inclusions (package_id, inclusion) VALUES (?, ?)');
+                    foreach ($inclusions as $inclusion) {
+                        $inclusion_stmt->execute([$package_id, $inclusion]);
+                    }
                 }
-            }
 
-            $conn->commit();
-            $success = 'New venue, package, and inclusions were saved successfully.';
-        } catch (PDOException $e) {
-            $conn->rollBack();
-            $errors[] = 'Unable to save the venue. Please try again later.';
+                $conn->commit();
+                $success = 'New venue, package, and inclusions were saved successfully.';
+            } catch (PDOException $e) {
+                $conn->rollBack();
+                $errors[] = 'Unable to save the venue. Please try again later.';
+            }
+        }
+    }
+
+    if (isset($_POST['delete_venue'])) {
+        $delete_id = (int) ($_POST['delete_venue'] ?? 0);
+        if ($delete_id > 0) {
+            $verify_stmt = $conn->prepare('SELECT Venue_id FROM venue WHERE Venue_id = ? AND User_id = ?');
+            $verify_stmt->execute([$delete_id, $user_id]);
+
+            if ($verify_stmt->fetch()) {
+                try {
+                    $conn->beginTransaction();
+
+                    $delete_inclusions = $conn->prepare('DELETE inclusions FROM inclusions JOIN packages ON inclusions.package_id = packages.Package_id WHERE packages.Venue_id = ?');
+                    $delete_inclusions->execute([$delete_id]);
+
+                    $delete_packages = $conn->prepare('DELETE FROM packages WHERE Venue_id = ?');
+                    $delete_packages->execute([$delete_id]);
+
+                    $delete_venue = $conn->prepare('DELETE FROM venue WHERE Venue_id = ?');
+                    $delete_venue->execute([$delete_id]);
+
+                    $conn->commit();
+                    $success = 'Venue deleted successfully.';
+                } catch (PDOException $e) {
+                    $conn->rollBack();
+                    $errors[] = 'Unable to delete the venue. Please try again later.';
+                }
+            } else {
+                $errors[] = 'Venue not found or you do not have permission to delete it.';
+            }
         }
     }
 }
@@ -103,9 +139,22 @@ $inactive_stmt = $conn->prepare("SELECT COUNT(*) FROM venue WHERE User_id = ? AN
 $inactive_stmt->execute([$user_id]);
 $inactive_venues = (int) $inactive_stmt->fetchColumn();
 
-$venues_stmt = $conn->prepare('SELECT * FROM venue WHERE User_id = ? ORDER BY Venue_id DESC LIMIT 5');
-$venues_stmt->execute([$user_id]);
+$total_pages = max(1, (int) ceil($total_venues / $items_per_page));
+if ($page > $total_pages) {
+    $page = $total_pages;
+}
+
+$offset = ($page - 1) * $items_per_page;
+
+$venues_stmt = $conn->prepare('SELECT * FROM venue WHERE User_id = ? ORDER BY Venue_id DESC LIMIT ? OFFSET ?');
+$venues_stmt->bindValue(1, $user_id, PDO::PARAM_INT);
+$venues_stmt->bindValue(2, $items_per_page, PDO::PARAM_INT);
+$venues_stmt->bindValue(3, $offset, PDO::PARAM_INT);
+$venues_stmt->execute();
 $venues = $venues_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$showing_start = $total_venues > 0 ? $offset + 1 : 0;
+$showing_end = min($offset + $items_per_page, $total_venues);
 ?>
 
 <style>
@@ -236,6 +285,96 @@ $venues = $venues_stmt->fetchAll(PDO::FETCH_ASSOC);
         background-color: var(--accent-gold);
         color: white;
     }
+
+    .page-btn.disabled {
+        opacity: 0.45;
+        pointer-events: none;
+    }
+
+    .btn-delete-action {
+        height: 24px;
+        padding: 0 0.7rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.35px;
+        border-radius: 4px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        border-width: 1px;
+    }
+
+    .btn-delete-action:hover,
+    .btn-delete-action:focus {
+        background-color: #F8D7DA;
+        color: #842029;
+    }
+
+    .delete-modal .modal-content {
+        border-radius: 18px;
+    }
+
+    .delete-modal .modal-body {
+        text-align: center;
+        padding: 2rem 2rem 1.25rem;
+    }
+
+    .delete-modal-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: rgba(176, 42, 55, 0.12);
+        color: #B02A37;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.45rem;
+        margin-bottom: 1rem;
+    }
+
+    .delete-modal p {
+        margin-bottom: 0.5rem;
+    }
+
+    .delete-modal .modal-footer {
+        border-top: none;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 1rem 1.75rem 1.5rem;
+    }
+
+    .delete-modal .btn-secondary {
+        min-width: 110px;
+    }
+
+    .modal-dialog {
+        max-width: 840px;
+    }
+
+    .modal-content {
+        border-radius: 18px;
+    }
+
+    .modal-header {
+        border-bottom: none;
+        padding: 1.75rem 1.75rem 0.75rem;
+    }
+
+    .modal-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+    }
+
+    .form-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .modal-footer {
+        border-top: none;
+        padding: 1rem 1.75rem 1.5rem;
+    }
 </style>
 
 <div class="container-fluid">
@@ -333,7 +472,11 @@ $venues = $venues_stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <td><?= htmlspecialchars($venue['Capacity'], ENT_QUOTES) ?> Guests</td>
                                 <td class="text-price">₱<?= number_format((float) $venue['Price_per_day'], 2) ?></td>
                                 <td><span class="status-badge <?= $venue['Status'] === 'active' ? 'active' : 'inactive' ?>"><?= strtoupper($venue['Status']) ?></span></td>
-                                <td class="text-center text-muted cursor-pointer"><i class="bi bi-three-dots"></i></td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-delete-action btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteVenueModal" data-venue-id="<?= $venue['Venue_id'] ?>" data-venue-name="<?= htmlspecialchars($venue['Name'], ENT_QUOTES) ?>">
+                                        Delete
+                                    </button>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -341,12 +484,13 @@ $venues = $venues_stmt->fetchAll(PDO::FETCH_ASSOC);
             </table>
         </div>
         <div class="p-3 px-4 d-flex justify-content-between align-items-center bg-white border-top">
-            <div class="text-muted" style="font-size: 9px; font-weight: 700; letter-spacing: 0.5px;">SHOWING <?= count($venues) ?> OF <?= $total_venues ?> VENUES</div>
+            <div class="text-muted" style="font-size: 9px; font-weight: 700; letter-spacing: 0.5px;">SHOWING <?= $showing_start ?> TO <?= $showing_end ?> OF <?= $total_venues ?> VENUES</div>
             <div class="d-flex gap-2">
-                <a href="#" class="page-btn"><i class="bi bi-chevron-left"></i></a>
-                <a href="#" class="page-btn active">1</a>
-                <a href="#" class="page-btn">2</a>
-                <a href="#" class="page-btn"><i class="bi bi-chevron-right"></i></a>
+                <a href="?page=<?= max(1, $page - 1) ?>" class="page-btn<?= $page <= 1 ? ' disabled' : '' ?>"><i class="bi bi-chevron-left"></i></a>
+                <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                    <a href="?page=<?= $i ?>" class="page-btn<?= $i === $page ? ' active' : '' ?>"><?= $i ?></a>
+                <?php endfor; ?>
+                <a href="?page=<?= min($total_pages, $page + 1) ?>" class="page-btn<?= $page >= $total_pages ? ' disabled' : '' ?>"><i class="bi bi-chevron-right"></i></a>
             </div>
         </div>
     </div>
@@ -354,7 +498,7 @@ $venues = $venues_stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <!-- Add Venue Modal -->
 <div class="modal fade" id="addVenueModal" tabindex="-1" aria-labelledby="addVenueModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="addVenueModalLabel">Add New Venue</h5>
@@ -426,5 +570,46 @@ $venues = $venues_stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
 </div>
+
+<!-- Delete Venue Modal -->
+<div class="modal fade" id="deleteVenueModal" tabindex="-1" aria-labelledby="deleteVenueModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered delete-modal">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post">
+                <input type="hidden" name="delete_venue" id="deleteVenueId" value="">
+                <div class="modal-body">
+                    <div class="delete-modal-icon">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                    </div>
+                    <p class="fs-6 fw-bold mb-2">Delete venue <strong id="deleteVenueName"></strong>?</p>
+                    <p class="text-muted small">This action will permanently remove the venue and any related packages and inclusions.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Yes, delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var deleteModal = document.getElementById('deleteVenueModal');
+        if (!deleteModal) return;
+
+        deleteModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var venueId = button.getAttribute('data-venue-id');
+            var venueName = button.getAttribute('data-venue-name');
+
+            deleteModal.querySelector('#deleteVenueId').value = venueId;
+            deleteModal.querySelector('#deleteVenueName').textContent = venueName;
+        });
+    });
+</script>
 
 <?php include __DIR__ . '/../includes/bottom_sidebar.php'; ?>
