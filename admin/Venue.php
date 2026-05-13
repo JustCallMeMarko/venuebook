@@ -1,12 +1,10 @@
 <?php
-session_start();
+require_once __DIR__ . '/../includes/auth.php';
+require_role('admin');
 
-// Include nav config
 include __DIR__ . '/../config/nav.php';
 
-// $nav_items  = $nav_config[$_SESSION['role']] ?? [];
-$nav_items  = $nav_config["admin"] ?? [];
-$active_nav = 'Venue';  
+$active_nav = 'Venue';
 $page_title = 'Venue';
 
 include __DIR__ . '/../includes/top_sidebar.php';
@@ -14,61 +12,142 @@ include __DIR__ . '/../includes/top_sidebar.php';
 
 <style>
     :root {
-        --color-accent: #B08C68;
+        --accent-gold: #A67C52;
         --font-serif: 'Libre Baskerville', serif;
     }
 
-    /* Content Header & Buttons */
-    .content-title { font-family: var(--font-serif); font-size: 26px; font-weight: 400; }
-    .btn-add-venue { 
-        background-color: var(--color-accent); color: white; border: none;
-        border-radius: 4px; font-size: 12px; font-weight: 600; padding: 8px 16px;
+    .member-portal-tag {
+        font-size: 10px;
+        font-weight: 800;
+        color: var(--accent-gold);
+        letter-spacing: 1px;
     }
-    .btn-add-venue:hover { background-color: #9C7A58; color: white; }
+
+    /* Content Header & Buttons */
+    .content-title {
+        font-family: var(--font-serif);
+        font-size: 26px;
+        font-weight: 400;
+    }
 
     /* Admin Metric Cards */
-    .metric-card { border: none; border-radius: 4px; padding: 20px; background: #fff; }
-    .metric-label { color: #707070; font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
-    .metric-value { font-size: 34px; font-family: var(--font-serif); color: #2C2C2C; }
+    .metric-card {
+        border: none;
+        border-radius: 4px;
+        padding: 20px;
+        background: #fff;
+    }
+
+    .metric-label {
+        color: #707070;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    .metric-value {
+        font-size: 34px;
+        font-family: var(--font-serif);
+        color: #2C2C2C;
+    }
 
     /* Table Styling */
-    .table-card { background: #fff; border-radius: 4px; overflow: hidden; border: none; }
-    .table-title { font-size: 11px; font-weight: 600; color: #A0A0A0; letter-spacing: 1px; }
-    
-    .table thead th {
-        font-size: 10px; color: #707070; background-color: #EBEAE8;
-        font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
-        padding: 12px 30px; border: none;
+    .table-card {
+        background: #fff;
+        border-radius: 4px;
+        overflow: hidden;
+        border: none;
     }
-    .table tbody td { font-size: 12px; padding: 15px 30px; vertical-align: middle; border-bottom: 1px solid #F0F0F0; }
-    
-    .venue-name { font-family: var(--font-serif); font-size: 13px; font-weight: 400; }
-    .text-price { font-weight: 600; color: var(--color-accent); }
+
+    .table-title {
+        font-size: 11px;
+        font-weight: 600;
+        color: #A0A0A0;
+        letter-spacing: 1px;
+    }
+
+    .table thead th {
+        font-size: 10px;
+        color: #707070;
+        background-color: #EBEAE8;
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        padding: 12px 30px;
+        border: none;
+    }
+
+    .table tbody td {
+        font-size: 12px;
+        padding: 15px 30px;
+        vertical-align: middle;
+        border-bottom: 1px solid #F0F0F0;
+    }
+
+    .venue-name {
+        font-family: var(--font-serif);
+        font-size: 13px;
+        font-weight: 400;
+    }
+
+    .text-price {
+        font-weight: 600;
+        color: var(--accent-gold);
+    }
 
     /* Status Badges */
-    .status-badge { font-size: 9px; font-weight: 700; border-radius: 4px; padding: 3px 8px; text-transform: uppercase; }
-    .status-badge.active { background-color: #6DC297; color: white; }
-    .status-badge.inactive { background-color: #D6D5D2; color: #707070; }
+    .status-badge {
+        font-size: 9px;
+        font-weight: 700;
+        border-radius: 4px;
+        padding: 3px 8px;
+        text-transform: uppercase;
+    }
+
+    .status-badge.active {
+        background-color: #6DC297;
+        color: white;
+    }
+
+    .status-badge.inactive {
+        background-color: #D6D5D2;
+        color: #707070;
+    }
 
     /* Pagination */
     .page-btn {
-        background-color: #E6E6E6; color: #707070; width: 28px; height: 28px;
-        border-radius: 4px; display: inline-flex; justify-content: center;
-        align-items: center; text-decoration: none; font-size: 10px;
+        background-color: #E6E6E6;
+        color: #707070;
+        width: 28px;
+        height: 28px;
+        border-radius: 4px;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        text-decoration: none;
+        font-size: 10px;
     }
-    .page-btn.active { background-color: var(--color-accent); color: white; }
+
+    .page-btn.active {
+        background-color: var(--accent-gold);
+        color: white;
+    }
 </style>
 
 <div class="container-fluid">
-    <!-- Page Header -->
-    <div class="d-md-flex justify-content-between align-items-start mb-4">
+    <div class="d-md-flex justify-content-between align-items-end mb-4 gap-3">
         <div>
-            <h1 class="content-title">Venue Management</h1>
-            <p class="text-muted small mb-0" style="max-width: 600px;">
-                Central management for all Estate Reserve properties, providing granular control over capacity, location details, and active status.
-            </p>
+            <span class="member-portal-tag text-uppercase">Venue</span>
+            <h1 class="font-cinzel display-5 fw-bold text-navy mt-1">Venue Management</h1>
+            <p class="text-muted mb-0">Central management for all Estate Reserve properties, providing granular control over capacity, location details, and active status.</p>
         </div>
-        <button class="btn btn-add-venue mt-3 mt-md-0"><i class="bi bi-plus-lg me-2"></i>ADD VENUE</button>
+        <button class="btn btn-dark mt-3 mt-md-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+            </svg>
+            Add Venue
+        </button>
     </div>
 
     <!-- Metrics Row -->

@@ -1,7 +1,4 @@
 <?php
-session_start();
-
-// Sample notifications (replace with DB queries as needed)
 $notifications = [
     ['title' => 'Booking confirmed', 'body' => 'Your booking for Hall A on May 10 was confirmed.', 'time' => '2h ago', 'type' => 'booking'],
     ['title' => 'New message', 'body' => 'You have a new message from the venue manager.', 'time' => '1d ago', 'type' => 'message'],
@@ -9,7 +6,11 @@ $notifications = [
 ];
 
 ?>
-<?php require_once __DIR__ . '/../includes/top_sidebar.php'; ?>
+<?php 
+require_once __DIR__ . '/../includes/top_sidebar.php'; 
+require_any_role(['admin', 'client']);
+?>
+
 
 <div class="container">
     <main class="col-12 col-lg-9 p-4 mx-auto">

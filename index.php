@@ -1,3 +1,11 @@
+<?php
+require_once __DIR__ . '/includes/auth.php';  
+
+if (is_logged_in()) {
+    header('Location: ' . BASE_URL . (is_admin() ? '/admin/index.php' : '/client/index.php'));
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="en" class="bg-dark">
 

@@ -9,7 +9,7 @@ $nav_config = [
         ['key' => 'Booking',     'label' => 'Booking',    'href' => '/venuebook/admin/Booking.php']
     ],
 
-    'organizer' => [
+    'client' => [
         ['key' => 'Dashboard',   'label' => 'Dashboard',  'href' => '/venuebook/client/index.php'],
         ['key' => 'Venue',       'label' => 'Venue',      'href' => '/venuebook/client/Venue.php'],
         ['key' => 'Booking',     'label' => 'Booking',    'href' => '/venuebook/client/Booking.php'],

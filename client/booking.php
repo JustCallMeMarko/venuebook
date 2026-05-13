@@ -1,13 +1,10 @@
 <?php
-session_start();
-
-// Include nav config
+require_once __DIR__ . '/../includes/auth.php';
+require_role('client');
 include __DIR__ . '/../config/nav.php';
 include __DIR__ . '/../config/db.php';
 
 
-// $nav_items  = $nav_config[$_SESSION['role']] ?? [];
-$nav_items  = $nav_config["organizer"] ?? [];
 $active_nav = 'Booking';  
 $page_title = 'Booking';
 
@@ -84,8 +81,9 @@ $balance_due = $total_committed - $amount_paid;
     :root {
         --bg-cream: #f8f6f1;
         --navy: #0e1b2d;
-        --accent-gold: #8e734b;
+        --accent-gold: #A67C52;
     }
+    .text-tag { font-size: 10px; font-weight: 800; color: var(--accent-gold); letter-spacing: 1px; }
     .font-cinzel { font-family: 'Cinzel', serif; }
 
     .card.border-0.shadow-sm {

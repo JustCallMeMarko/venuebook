@@ -1,7 +1,9 @@
 <?php
+require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/../config/nav.php';
 $page_title   = $page_title   ?? 'VenueBook';
 $active_nav   = $active_nav   ?? '';
-$nav_items    = $nav_items    ?? [];
+$nav_items  = $nav_config[$_SESSION['role']] ?? [];
 $settings_url = '/venuebook/shared/Settings.php';
 $notif_url = '/venuebook/shared/Notifications.php';
 ?>
@@ -12,6 +14,7 @@ $notif_url = '/venuebook/shared/Notifications.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/venuebook/assets/css/global.css">
+    <link rel="stylesheet" href="/venuebook/assets/css/venuebook.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     <link rel="icon" href="/venuebook/favicon.ico" type="image/x-icon">
     <title><?= htmlspecialchars($page_title) ?> — VenueBook</title>
@@ -95,7 +98,7 @@ $notif_url = '/venuebook/shared/Notifications.php';
                         <div class="d-flex align-items-center gap-2">
                             <img src="/venuebook/assets/images/person.svg" alt="" width="40" height="40" class="bg-dark rounded-1" aria-hidden="true">
                             <div>
-                                <h6 class="mb-0 font-mont"><?= htmlspecialchars(($_SESSION['first_name'] ?? '') . ' ' . ($_SESSION['last_name'] ?? '')) ?></h6>
+                                <h6 class="mb-0 font-mont fw-semibold"><?= htmlspecialchars(($_SESSION['first_name'] ?? '') . ' ' . ($_SESSION['last_name'] ?? '')) ?></h6>
                                 <p class="mb-0 font-mont" style="font-size:12px;">
                                     <?= ($_SESSION['role'] ?? '') === 'admin' ? 'Administrator' : 'Event Organizer' ?>
                                 </p>

@@ -1,21 +1,20 @@
 <?php
-session_start();
+require_once __DIR__ . '/../includes/auth.php';
+require_role('client');
 
-// Include nav config
 include __DIR__ . '/../config/nav.php';
+$user = get_currnt_user();
 
-// $nav_items  = $nav_config[$_SESSION['role']] ?? [];
-$nav_items  = $nav_config["organizer"] ?? [];
 $active_nav = 'Dashboard';  
 $page_title = 'Dashboard';
 
 include __DIR__ . '/../includes/top_sidebar.php';
 ?>
 
-<style>
+<!-- <style>
     /* Internal CSS for custom aesthetic touches not covered by Bootstrap */
     :root {
-        --gold: #8e734b;
+        --gold: #A67C52;
         --navy: #0e1b2d;
     }
     .member-portal-tag { font-size: 10px; font-weight: 800; color: var(--gold); letter-spacing: 1px; }
@@ -48,7 +47,7 @@ include __DIR__ . '/../includes/top_sidebar.php';
         width: 32px; height: 32px; border-radius: 50%;
         display: flex; align-items: center; justify-content: center; font-size: 12px;
     }
-</style>
+</style> -->
 
 <!-- Main Dashboard Content -->
 <div class="container-fluid">
@@ -56,11 +55,11 @@ include __DIR__ . '/../includes/top_sidebar.php';
     <!-- Header Row -->
     <div class="d-md-flex justify-content-between align-items-end mb-4 gap-3">
         <div>
-            <span class="member-portal-tag text-uppercase">Member Portal</span>
-            <h1 class="font-cinzel display-5 fw-bold text-navy mt-1">Welcome back, Cherry</h1>
-            <p class="text-muted mb-0">Your curated dashboard for bespoke event planning and exclusive venue access.</p>
+            <span class="text-tag text-uppercase">Dashboard</span>
+            <h1 class="font-cinzel display-5 fw-bold mt-1">Welcome back, <?php echo htmlspecialchars($user['first_name']); ?></h1>
+            <p class="text-secondary mb-0">Your curated dashboard for bespoke event planning and exclusive venue access.</p>
         </div>
-        <button class="btn btn-dark px-4 py-2 mt-3 mt-md-0">Book Your Next Event &rarr;</button>
+        <button class="btn btn-dark px-4 py-2 mt-3 mt-md-0">Book now &rarr;</button>
     </div>
 
     <div class="row g-4">
@@ -68,22 +67,21 @@ include __DIR__ . '/../includes/top_sidebar.php';
         <div class="col-12 col-xl-8">
             
             <!-- Featured Card -->
-            <div class="featured-card mb-4 shadow-sm">
+            <div class="featured-card mb-4 shadow-sm" style=" background: url('https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&q=80&w=1000') center/cover;">
                 <div class="featured-overlay p-4">
-                    <span class="text-warning fw-bold small mb-1">CONFIRMED BOOKING</span>
                     <h2 class="text-white font-cinzel">The Skyline Penthouse Gala</h2>
                     <p class="text-light opacity-75 mb-4">Friday, October 24th • 7:00 PM</p>
                     
                     <div class="d-flex flex-wrap align-items-center gap-4 border-top border-secondary pt-3">
                         <div>
-                            <label class="d-block text-secondary small text-uppercase">Guest Count</label>
+                            <label class="d-block text-light small text-uppercase">Guest Count</label>
                             <span class="text-white fw-bold">120 Guests</span>
                         </div>
                         <div>
-                            <label class="d-block text-secondary small text-uppercase">Status</label>
-                            <span class="text-white fw-bold">Finalized</span>
+                            <label class="d-block text-light small text-uppercase">Status</label>
+                            <span class="text-white fw-bold">Confirmed</span>
                         </div>
-                        <button class="btn btn-light btn-sm ms-auto fw-bold px-3">View Logistics</button>
+                        <button class="btn btn-light btn-sm ms-auto fw-bold px-3">View Contract</button>
                     </div>
                 </div>
             </div>
@@ -91,7 +89,7 @@ include __DIR__ . '/../includes/top_sidebar.php';
             <!-- Upcoming Events Section -->
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h3 class="h5 fw-bold mb-0">Upcoming Events</h3>
-                <a href="#" class="text-decoration-none small fw-bold" style="color: var(--gold);">View All</a>
+                <a href="#" class="text-decoration-none small fw-bold" style="color: var(--accent-gold);">View All</a>
             </div>
 
             <div class="row g-3">

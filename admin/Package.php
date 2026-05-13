@@ -1,12 +1,10 @@
 <?php
-session_start();
+require_once __DIR__ . '/../includes/auth.php';
+require_role('admin');
 
-// Include nav config
 include __DIR__ . '/../config/nav.php';
 
-// $nav_items  = $nav_config[$_SESSION['role']] ?? [];
-$nav_items  = $nav_config["admin"] ?? [];
-$active_nav = 'Package';  
+$active_nav = 'Package';
 $page_title = 'Package';
 
 include __DIR__ . '/../includes/top_sidebar.php';
@@ -14,10 +12,20 @@ include __DIR__ . '/../includes/top_sidebar.php';
 
 <style>
     :root {
-        --accent-brown: #967253;
+        --accent-gold: #A67C52;
         --merriweather: 'Merriweather', serif;
     }
-    .merriweather { font-family: var(--merriweather); }
+
+    .member-portal-tag {
+        font-size: 10px;
+        font-weight: 800;
+        color: var(--accent-gold);
+        letter-spacing: 1px;
+    }
+
+    .merriweather {
+        font-family: var(--merriweather);
+    }
 
     /* Stats Cards Styling */
     .stat-card {
@@ -29,9 +37,30 @@ include __DIR__ . '/../includes/top_sidebar.php';
         position: relative;
         overflow: hidden;
     }
-    .stat-label { font-size: 10px; font-weight: 800; color: #8E8C89; text-transform: uppercase; letter-spacing: 1px; }
-    .stat-value { font-family: var(--merriweather); font-size: 32px; color: var(--accent-brown); margin: 8px 0; }
-    .stat-icon-bg { position: absolute; bottom: 10px; right: 10px; opacity: 0.05; font-size: 60px; pointer-events: none; }
+
+    .stat-label {
+        font-size: 10px;
+        font-weight: 800;
+        color: #8E8C89;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .stat-value {
+        font-family: var(--merriweather);
+        font-size: 32px;
+        color: var(--accent-gold);
+        margin: 8px 0;
+    }
+
+    .stat-icon-bg {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        opacity: 0.05;
+        font-size: 60px;
+        pointer-events: none;
+    }
 
     /* Registry Table Styling */
     .package-container {
@@ -40,7 +69,16 @@ include __DIR__ . '/../includes/top_sidebar.php';
         border-radius: 12px;
         overflow: hidden;
     }
-    .nav-tabs-custom { display: flex; gap: 30px; list-style: none; padding: 0; margin: 0; border-bottom: 1px solid #ECE8E3; }
+
+    .nav-tabs-custom {
+        display: flex;
+        gap: 30px;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        border-bottom: 1px solid #ECE8E3;
+    }
+
     .tab-link {
         text-decoration: none;
         font-size: 11px;
@@ -50,8 +88,12 @@ include __DIR__ . '/../includes/top_sidebar.php';
         display: inline-block;
         letter-spacing: 0.5px;
     }
-    .tab-link.active { color: #1A1918; border-bottom: 3px solid #1A1918; }
-    
+
+    .tab-link.active {
+        color: #1A1918;
+        border-bottom: 3px solid #1A1918;
+    }
+
     .btn-create {
         background-color: #0F1219;
         color: white;
@@ -71,30 +113,63 @@ include __DIR__ . '/../includes/top_sidebar.php';
         text-transform: uppercase;
         padding: 20px 24px;
     }
-    .table tbody td { padding: 28px 24px; vertical-align: middle; }
-    
-    .pkg-name-main { font-family: var(--merriweather); font-size: 16px; font-weight: 700; color: #0E1F33; }
-    .pill-inclusion { background-color: #EFECE8; color: #8E8C89; font-size: 10px; font-weight: 600; padding: 4px 10px; border-radius: 4px; margin-right: 5px; }
-    .price-text { font-family: var(--merriweather); font-size: 18px; color: var(--accent-brown); font-weight: 700; }
 
-    .status-tag { font-size: 9px; font-weight: 800; padding: 5px 12px; border-radius: 100px; border: 1px solid transparent; }
-    .status-active { background-color: #F4F7F2; color: #5D7A5D; border-color: #E5EADF; }
-    .status-archived { background-color: #F7F7F7; color: #666; border-color: #EDEDED; }
+    .table tbody td {
+        padding: 28px 24px;
+        vertical-align: middle;
+    }
+
+    .pkg-name-main {
+        font-family: var(--merriweather);
+        font-size: 16px;
+        font-weight: 700;
+        color: #0E1F33;
+    }
+
+    .pill-inclusion {
+        background-color: #EFECE8;
+        color: #8E8C89;
+        font-size: 10px;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 4px;
+        margin-right: 5px;
+    }
+
+    .price-text {
+        font-family: var(--merriweather);
+        font-size: 18px;
+        color: var(--accent-gold);
+        font-weight: 700;
+    }
+
+    .status-tag {
+        font-size: 9px;
+        font-weight: 800;
+        padding: 5px 12px;
+        border-radius: 100px;
+        border: 1px solid transparent;
+    }
+
+    .status-active {
+        background-color: #F4F7F2;
+        color: #5D7A5D;
+        border-color: #E5EADF;
+    }
+
+    .status-archived {
+        background-color: #F7F7F7;
+        color: #666;
+        border-color: #EDEDED;
+    }
 </style>
 
 <div class="container-fluid">
-    <!-- Page Header -->
-    <div class="d-md-flex justify-content-between align-items-start mb-5">
-        <div>
-            <h1 class="display-5 merriweather mb-1 text-dark">Package Registry</h1>
-            <p class="text-muted">Comprehensive management of service tiers across estates.</p>
-        </div>
-        <div class="text-md-end mt-3 mt-md-0">
-            <div class="stat-label mb-1">Estate Status</div>
-            <div style="color: var(--accent-brown); font-weight: 700;">
-                <i class="bi bi-circle-fill me-2" style="font-size: 8px;"></i>Operational
-            </div>
-        </div>
+
+    <div class="mb-4">
+        <span class="member-portal-tag text-uppercase">Package</span>
+        <h1 class="font-cinzel display-5 fw-bold text-navy mt-1">Package Registry</h1>
+        <p class="text-muted mb-0">Comprehensive management of service tiers across estates.</p>
     </div>
 
     <!-- Metrics Row -->
@@ -132,7 +207,12 @@ include __DIR__ . '/../includes/top_sidebar.php';
             <li><a href="#" class="tab-link">ARCHIVED</a></li>
             <li><a href="#" class="tab-link">DRAFTS</a></li>
         </ul>
-        <button class="btn-create">+ CREATE</button>
+        <button class="btn btn-dark">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+            </svg>
+            Create Package
+        </button>
     </div>
 
     <!-- Package Table -->
