@@ -1,11 +1,37 @@
 <?php
 require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/../config/nav.php';
+require_once __DIR__ . '/../config/notifications.php';
+
+$unread_notifications = 0;
+if (isset($_SESSION['user_id'])) {
+    global $conn;
+    if (isset($conn)) {
+        $unread_notifications = get_unread_notification_count($conn, $_SESSION['user_id']);
+    }
+}
+
 $page_title   = $page_title   ?? 'VenueBook';
 $active_nav   = $active_nav   ?? '';
 $nav_items  = $nav_config[$_SESSION['role']] ?? [];
 $settings_url = '/venuebook/shared/Settings.php';
-$notif_url = '/venuebook/shared/Notifications.php';
+$notif_url = '/venuebook/client/notifications.php';
+
+$profile_image = $_SESSION['profile_image'] ?? '';
+if (empty($profile_image) && isset($_SESSION['user_id']) && isset($conn)) {
+    try {
+        $profileStmt = $conn->prepare('SELECT profile_image FROM users WHERE User_id = ?');
+        $profileStmt->execute([$_SESSION['user_id']]);
+        $profile_image = (string) ($profileStmt->fetchColumn() ?: '');
+        if (!empty($profile_image)) {
+            $_SESSION['profile_image'] = $profile_image;
+        }
+    } catch (Throwable $e) {
+        $profile_image = '';
+    }
+}
+
+$profile_avatar = !empty($profile_image) ? $profile_image : '/venuebook/assets/images/person.svg';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -16,6 +42,7 @@ $notif_url = '/venuebook/shared/Notifications.php';
     <link rel="stylesheet" href="/venuebook/assets/css/global.css">
     <link rel="stylesheet" href="/venuebook/assets/css/venuebook.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="icon" href="/venuebook/favicon.ico" type="image/x-icon">
     <title><?= htmlspecialchars($page_title) ?> — VenueBook</title>
     <style>
@@ -96,7 +123,7 @@ $notif_url = '/venuebook/shared/Notifications.php';
                         tabindex="0"
                         onclick="window.location.href='<?= htmlspecialchars($settings_url) ?>';">
                         <div class="d-flex align-items-center gap-2">
-                            <img src="/venuebook/assets/images/person.svg" alt="" width="40" height="40" class="bg-dark rounded-1" aria-hidden="true">
+                                <img src="<?= htmlspecialchars($profile_avatar) ?>" alt="Profile" width="40" height="40" class="rounded-2 object-fit-cover border border-dark-subtle" aria-hidden="true">
                             <div>
                                 <h6 class="mb-0 font-mont fw-semibold"><?= htmlspecialchars(($_SESSION['first_name'] ?? '') . ' ' . ($_SESSION['last_name'] ?? '')) ?></h6>
                                 <p class="mb-0 font-mont" style="font-size:12px;">
@@ -104,10 +131,16 @@ $notif_url = '/venuebook/shared/Notifications.php';
                                 </p>
                             </div>
                         </div>
-                        <button class="btn p-1" aria-label="Notifications" onclick="window.location.href='<?= htmlspecialchars($notif_url) ?>'; event.stopPropagation();">
+                        <button class="btn p-1 position-relative" aria-label="Notifications" onclick="window.location.href='<?= htmlspecialchars($notif_url) ?>'; event.stopPropagation();">
                             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" stroke="currentColor" stroke-width="0.6" class="bi bi-bell" viewBox="0 0 16 16" aria-hidden="true">
                                 <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2M8 1.918l-.797.161A4 4 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4 4 0 0 0-3.203-3.92zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5 5 0 0 1 13 6c0 .88.32 4.2 1.22 6" />
                             </svg>
+                            <?php if ($unread_notifications > 0): ?>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.55rem; padding: 0.25em 0.4em;">
+                                    <?= $unread_notifications > 99 ? '99+' : $unread_notifications ?>
+                                    <span class="visually-hidden">unread messages</span>
+                                </span>
+                            <?php endif; ?>
                         </button>
                     </div>
                 </div>

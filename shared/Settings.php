@@ -10,6 +10,41 @@ $page_title = 'Settings';
 $success_msg = '';
 $error_msg = '';
 
+function upload_profile_image(array $file, int $user_id): ?string {
+    $allowed = ['image/jpeg', 'image/png', 'image/webp'];
+    $max_size = 4 * 1024 * 1024;
+
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) return null;
+    if (!in_array($file['type'] ?? '', $allowed, true)) return null;
+    if (($file['size'] ?? 0) > $max_size) return null;
+    if (!getimagesize($file['tmp_name'] ?? '')) return null;
+
+    $upload_dir = __DIR__ . '/../assets/uploads/profiles/';
+    if (!is_dir($upload_dir)) {
+        mkdir($upload_dir, 0755, true);
+    }
+
+    $ext = strtolower(pathinfo($file['name'] ?? '', PATHINFO_EXTENSION));
+    $filename = 'profile_' . $user_id . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+    $dest = $upload_dir . $filename;
+
+    if (move_uploaded_file($file['tmp_name'], $dest)) {
+        return '/venuebook/assets/uploads/profiles/' . $filename;
+    }
+
+    return null;
+}
+
+try {
+    $columnCheck = $conn->prepare("SHOW COLUMNS FROM users LIKE 'profile_image'");
+    $columnCheck->execute();
+    if (!$columnCheck->fetch(PDO::FETCH_ASSOC)) {
+        $conn->exec("ALTER TABLE users ADD COLUMN profile_image VARCHAR(255) NULL");
+    }
+} catch (PDOException $e) {
+    $error_msg = $error_msg ?: 'Unable to prepare profile image storage.';
+}
+
 // Handle Save Changes
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $first_name = $_POST['first_name'] ?? '';
@@ -17,6 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $_POST['email'] ?? '';
     $phone = $_POST['phone'] ?? '';
     $new_password = $_POST['password'] ?? '';
+    $profile_image = $_FILES['profile_image'] ?? null;
 
     try {
         $stmt = $conn->prepare("SELECT * FROM users WHERE User_id = ?");
@@ -28,28 +64,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $last_name = !empty($last_name) ? $last_name : $current_user['Last_name'];
         $email = !empty($email) ? $email : $current_user['Email'];
         $phone = !empty($phone) ? $phone : $current_user['Phone_num'];
+        $stored_profile_image = $current_user['profile_image'] ?? null;
 
-        if (!empty($new_password)) {
-            $password_hash = password_hash($new_password, PASSWORD_DEFAULT);
-            $stmt = $conn->prepare("UPDATE users SET First_name = ?, Last_name = ?, Email = ?, Phone_num = ?, Password_hash = ? WHERE User_id = ?");
-            $stmt->execute([$first_name, $last_name, $email, $phone, $password_hash, $current_user_id]);
-        } else {
-            $stmt = $conn->prepare("UPDATE users SET First_name = ?, Last_name = ?, Email = ?, Phone_num = ? WHERE User_id = ?");
-            $stmt->execute([$first_name, $last_name, $email, $phone, $current_user_id]);
+        if (!empty($profile_image['name'])) {
+            $uploaded_image = upload_profile_image($profile_image, $current_user_id);
+            if ($uploaded_image) {
+                if (!empty($stored_profile_image)) {
+                    $old_path = __DIR__ . '/../' . ltrim($stored_profile_image, '/');
+                    if (is_file($old_path)) {
+                        unlink($old_path);
+                    }
+                }
+                $stored_profile_image = $uploaded_image;
+            } else {
+                $error_msg = 'Failed to upload profile image. Use JPG, PNG, or WebP under 4MB.';
+            }
         }
 
-        $_SESSION['first_name'] = $first_name;
-        $_SESSION['last_name'] = $last_name;
+        if (empty($error_msg)) {
+            if (!empty($new_password)) {
+                $password_hash = password_hash($new_password, PASSWORD_DEFAULT);
+                $stmt = $conn->prepare("UPDATE users SET First_name = ?, Last_name = ?, Email = ?, Phone_num = ?, Password_hash = ?, profile_image = ? WHERE User_id = ?");
+                $stmt->execute([$first_name, $last_name, $email, $phone, $password_hash, $stored_profile_image, $current_user_id]);
+            } else {
+                $stmt = $conn->prepare("UPDATE users SET First_name = ?, Last_name = ?, Email = ?, Phone_num = ?, profile_image = ? WHERE User_id = ?");
+                $stmt->execute([$first_name, $last_name, $email, $phone, $stored_profile_image, $current_user_id]);
+            }
 
-        $success_msg = "Changes saved successfully!";
+            $_SESSION['first_name'] = $first_name;
+            $_SESSION['last_name'] = $last_name;
+            $_SESSION['profile_image'] = $stored_profile_image;
+
+            $success_msg = "Changes saved successfully!";
+        }
     } catch (PDOException $e) {
         $error_msg = "Error updating profile: " . $e->getMessage();
     }
 }
 
-// Fetch all user info for placeholders (excluding password and profile picture)
+// Fetch all user info for placeholders
 try {
-    $stmt = $conn->prepare("SELECT First_name, Last_name, Email, Phone_num, Role, Created_at FROM users WHERE User_id = ?");
+    $stmt = $conn->prepare("SELECT First_name, Last_name, Email, Phone_num, Role, Created_at, profile_image FROM users WHERE User_id = ?");
     $stmt->execute([$current_user_id]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
@@ -71,19 +126,23 @@ require_any_role(['admin', 'client']);
         <div class="alert alert-danger"><?php echo $error_msg; ?></div>
     <?php endif; ?>
 
-    <form class="p-4 rounded-3 border border-dark-subtle" method="POST">
+    <form class="p-4 rounded-3 border border-dark-subtle" method="POST" enctype="multipart/form-data">
         <section class="mb-4">
             <h4 class="font-open">Profile</h4>
             <p class="font-open" style="font-size: 14px;">View and edit your personal information, including your name and profile picture.</p>
             <div class="d-flex gap-4 align-items-center">
-                <img src="https://th.bing.com/th/id/OIP.WTz8r0NiRmcRWxwi4nqqWAHaJ7?o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Profile Picture" class="rounded-circle object-fit-cover" width="70" height="70">
-                <button type="button" class="btn btn-light border border-dark-subtle" style="height: fit-content;">
+                <?php $profileSrc = !empty($user['profile_image']) ? htmlspecialchars($user['profile_image']) : '/venuebook/assets/images/person.svg'; ?>
+                <img src="<?= $profileSrc ?>" alt="Profile Picture" class="rounded-2 object-fit-cover border border-dark-subtle" width="70" height="70" id="profilePreview">
+                <div>
+                    <label for="profileImage" class="btn btn-light border border-dark-subtle mb-0" style="height: fit-content; cursor:pointer;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-upload me-2" viewBox="0 0 16 16">
                         <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5" />
                         <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708z" />
                     </svg>
                     Upload New Picture
-                </button>
+                    </label>
+                    <input type="file" class="d-none" name="profile_image" id="profileImage" accept="image/jpeg,image/png,image/webp">
+                </div>
             </div>
         </section>
         <section class="mb-4">
@@ -160,5 +219,22 @@ require_any_role(['admin', 'client']);
         </div>
     </form>
 </div>
+
+<script>
+    const profileImageInput = document.getElementById('profileImage');
+    const profilePreview = document.getElementById('profilePreview');
+
+    if (profileImageInput && profilePreview) {
+        profileImageInput.addEventListener('change', function () {
+            const file = this.files && this.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                profilePreview.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+</script>
 
 <?php require_once __DIR__ . '/../includes/bottom_sidebar.php'; ?>
