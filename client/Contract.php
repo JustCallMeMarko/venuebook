@@ -1,13 +1,43 @@
 <?php
 require_once __DIR__ . '/../includes/auth.php';
 require_role('client');
+require_once __DIR__ . '/../config/db.php';
 
 $user = get_currnt_user();
+
+$booking_id = isset($_GET['booking_id']) ? (int)$_GET['booking_id'] : 0;
+if ($booking_id <= 0) {
+    header('Location: booking.php');
+    exit;
+}
+
+// Fetch booking data
+$stmt = $conn->prepare('
+    SELECT 
+        b.*, 
+        c.contractid,
+        v.Name AS VenueName, v.Location AS VenueLocation,
+        p.Name AS PackageName,
+        u.First_name AS AdminFirst, u.Last_name AS AdminLast
+    FROM bookings b
+    JOIN contracts c ON b.Booking_id = c.bookingid
+    JOIN venue v ON b.Venue_id = v.Venue_id
+    LEFT JOIN packages p ON b.Package_id = p.Package_id
+    JOIN users u ON v.User_id = u.User_id
+    WHERE b.Booking_id = ? AND b.User_id = ?
+');
+$stmt->execute([$booking_id, $user['user_id']]);
+$booking = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$booking) {
+    header('Location: booking.php');
+    exit;
+}
 
 include __DIR__ . '/../config/nav.php';
 
 $active_nav = 'Booking';
-$page_title = 'Booking';
+$page_title = 'Contract Agreement';
 
 include __DIR__ . '/../includes/top_sidebar.php';
 ?>
@@ -89,10 +119,7 @@ include __DIR__ . '/../includes/top_sidebar.php';
 
     /* Print logic */
     @media print {
-
-        .sidebar,
-        .vb-page-header,
-        .notif-bell {
+        .sidebar, .vb-page-header, .notif-bell, .btn-print, header, nav, .bottom-sidebar {
             display: none !important;
         }
 
@@ -113,16 +140,19 @@ include __DIR__ . '/../includes/top_sidebar.php';
 <div class="container-fluid">
     <div class="d-md-flex justify-content-between align-items-end mb-4 gap-3">
         <div>
-            <span class="text-tag text-uppercase">Booking</span>
+            <span class="text-tag text-uppercase">Contract #<?= str_pad($booking['contractid'], 5, '0', STR_PAD_LEFT) ?></span>
             <h1 class="font-cinzel display-5 fw-bold mt-1">Legal Agreement</h1>
             <p class="text-secondary mb-0">Contract for <?php echo htmlspecialchars($user['first_name'] . ' ' . $user['last_name']); ?></p>
         </div>
-        <button class="btn-print shadow-sm" onclick="window.print()">
-            <i class="fas fa-print me-2"></i> Print Contract
-        </button>
+        <div>
+            <a href="booking.php" class="btn btn-outline-secondary btn-sm me-2 d-print-none">Back</a>
+            <button class="btn-print shadow-sm" onclick="window.print()">
+                <i class="fas fa-print me-2"></i> Print Contract
+            </button>
+        </div>
     </div>
 
-    <!-- The "Paper" Document -->
+    <!-- The Paper Document -->
     <div class="contract-paper mb-5">
         <div class="d-flex align-items-center mb-4">
             <img src="/venuebook/assets/images/Logo.svg" style="width: 28px; margin-right: 12px;">
@@ -135,12 +165,11 @@ include __DIR__ . '/../includes/top_sidebar.php';
         <div class="row mb-4">
             <div class="col-6">
                 <div class="info-label">Client / Licensee</div>
-                <div class="fw-bold fs-5">John Wick</div>
-                <div class="small text-muted">Continental Corp.</div>
+                <div class="fw-bold fs-5"><?php echo htmlspecialchars($user['first_name'] . ' ' . $user['last_name']); ?></div>
             </div>
             <div class="col-6">
                 <div class="info-label">Administrator</div>
-                <div class="fw-bold fs-5">Mary Santos</div>
+                <div class="fw-bold fs-5"><?= htmlspecialchars($booking['AdminFirst'] . ' ' . $booking['AdminLast']) ?></div>
                 <div class="small text-muted">Estate Operations Manager</div>
             </div>
         </div>
@@ -148,24 +177,28 @@ include __DIR__ . '/../includes/top_sidebar.php';
         <!-- Agreement Text -->
         <h2 class="section-header vb-serif">I. General Agreement</h2>
         <p class="contract-text">
-            The Client hereby agrees to pay the Administrator the total amount of <strong>$50,000.00</strong> on or before the specified event date (<strong>September 20, 2026</strong>). It is understood that if the Client fails to settle the remaining balance by this date, the initial downpayment shall be deemed non-refundable as per company policy.
+            The Client hereby agrees to pay the Administrator the total amount of <strong>₱<?= number_format((float)$booking['Total_price'], 2) ?></strong>. Payments are considered refundable up to <strong>three (3) days prior</strong> to the specified event date (<strong><?= date('F j, Y', strtotime($booking['Event_date'])) ?></strong>) or payment deadline. It is understood that if the Client cancels within 3 days of the specified date, the payment or downpayment shall be deemed strictly non-refundable as per company policy.
         </p>
 
         <h2 class="section-header vb-serif">II. Venue Assignment</h2>
         <p class="contract-text">
-            <strong>The Grand Ballroom</strong><br>
-            Continental Hotel, 100 Beaver St, New York City, NY 10005.
+            <strong><?= htmlspecialchars($booking['VenueName'], ENT_QUOTES) ?></strong><br>
+            <?= htmlspecialchars($booking['VenueLocation'], ENT_QUOTES) ?>.
         </p>
 
         <h2 class="section-header vb-serif">III. Service Package</h2>
         <p class="contract-text">
-            <strong>Elite Wedding & Event Package:</strong> Comprehensive venue access for 12 hours, customized gourmet catering for 200 guests, full AV support, and dedicated event concierge.
+            <?php if ($booking['PackageName']): ?>
+                <strong><?= htmlspecialchars($booking['PackageName'], ENT_QUOTES) ?>:</strong> Standard venue access, including chosen inclusions and dedicated event concierge.
+            <?php else: ?>
+                <strong>No Package Selected:</strong> Standard venue access only. No specialized inclusions or catering provided.
+            <?php endif; ?>
         </p>
 
         <h2 class="section-header vb-serif">IV. Event Schedule</h2>
         <p class="contract-text">
-            Scheduled Date: <strong>Saturday, September 20, 2026</strong><br>
-            Access Time: 10:00 AM — 11:59 PM
+            Scheduled Date: <strong><?= date('l, F j, Y', strtotime($booking['Event_date'])) ?></strong><br>
+            Guest Count: <?= htmlspecialchars($booking['Guest_count'], ENT_QUOTES) ?> Guests
         </p>
 
         <!-- Signatures -->
