@@ -3,6 +3,85 @@ require_once __DIR__ . '/../includes/auth.php';
 require_role('admin');
 
 include __DIR__ . '/../config/nav.php';
+include __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../config/notifications.php';
+
+$user = get_currnt_user();
+$user_id = $user['user_id'];
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['booking_id']) && !empty($_POST['action'])) {
+    $booking_id = (int) $_POST['booking_id'];
+    $action = $_POST['action'] === 'approve' ? 'confirmed' : 'rejected';
+
+    if (in_array($action, ['confirmed', 'rejected'], true)) {
+        $update_stmt = $conn->prepare("UPDATE bookings SET Booking_status = ? WHERE Booking_id = ?");
+        $update_stmt->execute([$action, $booking_id]);
+
+        // Create notification using helper function
+        create_booking_status_notification($conn, $booking_id, $action);
+
+        header('Location: Booking.php');
+        exit;
+    }
+}
+
+$pending_count = 0;
+$approved_count = 0;
+$flagged_count = 0;
+$estimated_revenue = 0;
+
+try {
+    $pending_stmt = $conn->prepare("SELECT COUNT(*) FROM bookings WHERE Booking_status = 'pending'");
+    $pending_stmt->execute();
+    $pending_count = (int) $pending_stmt->fetchColumn();
+
+    $approved_stmt = $conn->prepare("SELECT COUNT(*) FROM bookings WHERE Booking_status IN ('confirmed', 'approved')");
+    $approved_stmt->execute();
+    $approved_count = (int) $approved_stmt->fetchColumn();
+
+    $flagged_stmt = $conn->prepare("SELECT COUNT(*) FROM bookings WHERE Booking_status = 'pending' AND Payment_deadline < NOW()");
+    $flagged_stmt->execute();
+    $flagged_count = (int) $flagged_stmt->fetchColumn();
+
+    $revenue_stmt = $conn->prepare("SELECT SUM(Total_price) FROM bookings WHERE Booking_status IN ('confirmed', 'approved')");
+    $revenue_stmt->execute();
+    $estimated_revenue = (float) $revenue_stmt->fetchColumn();
+    
+    // Check for alerts and notify admins (once per session)
+    if (!isset($_SESSION['admin_alerts_checked'])) {
+        if ($pending_count > 0) {
+            notify_admins_pending_approvals($conn);
+        }
+        if ($flagged_count > 0) {
+            notify_admins_overdue_payments($conn);
+        }
+        $_SESSION['admin_alerts_checked'] = true;
+    }
+} catch (PDOException $e) {
+    $pending_count = $approved_count = $flagged_count = 0;
+    $estimated_revenue = 0;
+}
+
+$bookings_stmt = $conn->prepare(
+    "SELECT 
+        b.Booking_id,
+        b.Booking_status,
+        b.Event_date,
+        b.Payment_deadline,
+        b.Total_price,
+        b.Guest_count,
+        b.Package_id,
+        u.First_name,
+        u.Last_name,
+        v.Name AS Venue_name
+    FROM bookings b
+    LEFT JOIN users u ON b.User_id = u.User_id
+    LEFT JOIN venue v ON b.Venue_id = v.Venue_id
+    ORDER BY b.Event_date DESC
+    LIMIT 5"
+);
+$bookings_stmt->execute();
+$bookings = $bookings_stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $active_nav = 'Booking';  
 $page_title = 'Booking';
@@ -40,6 +119,7 @@ include __DIR__ . '/../includes/top_sidebar.php';
     
     .badge-pending { background-color: #F3C65F; color: #000; border-radius: 4px; padding: 6px 12px; font-weight: 700; font-size: 0.7rem; }
     .badge-approved { background-color: #E8F5E9; color: #2E7D32; border-radius: 4px; padding: 6px 12px; font-weight: 700; font-size: 0.7rem; }
+    .badge-rejected { background-color: #F8D7DA; color: #842029; border-radius: 4px; padding: 6px 12px; font-weight: 700; font-size: 0.7rem; }
 
     /* Workflow Banner */
     .workflow-section { 
@@ -69,25 +149,25 @@ include __DIR__ . '/../includes/top_sidebar.php';
         <div class="col-6 col-md-3">
             <div class="stat-card h-100">
                 <span class="stat-label">Pending Requests</span>
-                <span class="stat-value">24</span>
+                <span class="stat-value"><?= number_format($pending_count) ?></span>
             </div>
         </div>
         <div class="col-6 col-md-3">
             <div class="stat-card h-100">
                 <span class="stat-label">Approved Today</span>
-                <span class="stat-value">12</span>
+                <span class="stat-value"><?= number_format($approved_count) ?></span>
             </div>
         </div>
         <div class="col-6 col-md-3">
             <div class="stat-card h-100">
                 <span class="stat-label">Flagged Items</span>
-                <span class="stat-value text-flagged">03</span>
+                <span class="stat-value text-flagged"><?= number_format($flagged_count) ?></span>
             </div>
         </div>
         <div class="col-6 col-md-3">
             <div class="stat-card h-100">
                 <span class="stat-label">Est. Revenue</span>
-                <span class="stat-value">$42.8k</span>
+                <span class="stat-value">$<?= number_format($estimated_revenue, 2) ?></span>
             </div>
         </div>
     </div>
@@ -110,41 +190,69 @@ include __DIR__ . '/../includes/top_sidebar.php';
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td class="text-muted">#BK-9421</td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <div class="client-avatar" style="background-color: #D1E3F8; color: #4A90E2;">ER</div>
-                                <strong class="small">Eleanor Rigby</strong>
-                            </div>
-                        </td>
-                        <td class="text-muted small">Grand Ballroom East</td>
-                        <td class="text-muted small">Premium Gala</td>
-                        <td class="text-muted small">Dec 12, 2026</td>
-                        <td><strong class="small">$12,400</strong></td>
-                        <td style="color: var(--accent-red); font-size: 0.75rem; font-weight: 600;">Nov 30, 2026</td>
-                        <td><span class="badge-pending">PENDING</span></td>
-                        <td>
-                            <span class="text-success fw-bold cursor-pointer me-2" style="font-size: 0.65rem;">APPROVE</span>
-                            <span class="text-danger fw-bold cursor-pointer" style="font-size: 0.65rem;">REJECT</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="text-muted">#BK-8834</td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <div class="client-avatar" style="background-color: #FDEBD0; color: #E67E22;">JM</div>
-                                <strong class="small">Julian Mars</strong>
-                            </div>
-                        </td>
-                        <td class="text-muted small">The Glass Pavilion</td>
-                        <td class="text-muted small">Corporate Day</td>
-                        <td class="text-muted small">Jan 05, 2027</td>
-                        <td><strong class="small">$8,250</strong></td>
-                        <td class="text-muted small">Dec 15, 2026</td>
-                        <td><span class="badge-approved">APPROVED</span></td>
-                        <td class="text-muted fst-italic" style="font-size: 0.65rem;">Validated</td>
-                    </tr>
+                    <?php if (empty($bookings)): ?>
+                        <tr>
+                            <td colspan="9" class="text-center py-4 text-muted">No bookings found.</td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($bookings as $booking): ?>
+                            <?php
+                                $client_name = trim(($booking['First_name'] ?? '') . ' ' . ($booking['Last_name'] ?? ''));
+                                $initials = '';
+                                if (!empty($booking['First_name'])) {
+                                    $initials .= strtoupper($booking['First_name'][0]);
+                                }
+                                if (!empty($booking['Last_name'])) {
+                                    $initials .= strtoupper($booking['Last_name'][0]);
+                                }
+                                if ($initials === '') {
+                                    $initials = 'CL';
+                                }
+                                $status = strtolower(trim($booking['Booking_status'] ?? 'pending'));
+                                $badgeClass = $status === 'confirmed' || $status === 'approved'
+                                    ? 'badge-approved'
+                                    : ($status === 'rejected' ? 'badge-rejected' : 'badge-pending');
+                                $statusLabel = $status === 'confirmed' ? 'APPROVED' : strtoupper($status);
+                            ?>
+                            <tr>
+                                <td class="text-muted">#<?= htmlspecialchars($booking['Booking_id'] ?? '') ?></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="client-avatar" style="background-color: #D1E3F8; color: #0A3D62;">
+                                            <?= htmlspecialchars($initials) ?>
+                                        </div>
+                                        <strong class="small"><?= htmlspecialchars($client_name ?: 'Guest') ?></strong>
+                                    </div>
+                                </td>
+                                <td class="text-muted small"><?= htmlspecialchars($booking['Venue_name'] ?? 'Unknown Venue') ?></td>
+                                <td class="text-muted small"><?= htmlspecialchars($booking['Package_id'] ?? 'N/A') ?></td>
+                                <td class="text-muted small"><?= !empty($booking['Event_date']) ? date('M d, Y', strtotime($booking['Event_date'])) : 'TBD' ?></td>
+                                <td><strong class="small">$<?= number_format((float) ($booking['Total_price'] ?? 0), 2) ?></strong></td>
+                                <td class="text-muted small"><?= !empty($booking['Payment_deadline']) ? date('M d, Y', strtotime($booking['Payment_deadline'])) : 'N/A' ?></td>
+                                <td><span class="<?= $badgeClass ?>"><?= $statusLabel ?></span></td>
+                                <td>
+                                    <?php if ($status === 'pending'): ?>
+                                        <div class="d-flex gap-2">
+                                            <form method="post" class="m-0">
+                                                <input type="hidden" name="booking_id" value="<?= htmlspecialchars($booking['Booking_id']) ?>">
+                                                <input type="hidden" name="action" value="approve">
+                                                <button type="submit" class="btn btn-sm btn-success px-2">Approve</button>
+                                            </form>
+                                            <form method="post" class="m-0">
+                                                <input type="hidden" name="booking_id" value="<?= htmlspecialchars($booking['Booking_id']) ?>">
+                                                <input type="hidden" name="action" value="reject">
+                                                <button type="submit" class="btn btn-sm btn-danger px-2">Reject</button>
+                                            </form>
+                                        </div>
+                                    <?php else: ?>
+                                        <span class="text-muted fst-italic" style="font-size: 0.65rem;">
+                                            <?= $status === 'rejected' ? 'Rejected' : 'Validated' ?>
+                                        </span>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
