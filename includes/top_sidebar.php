@@ -15,7 +15,7 @@ $page_title   = $page_title   ?? 'VenueBook';
 $active_nav   = $active_nav   ?? '';
 $nav_items  = $nav_config[$_SESSION['role']] ?? [];
 $settings_url = '/venuebook/shared/Settings.php';
-$notif_url = '/venuebook/client/notifications.php';
+$notif_url = '/venuebook/shared/Notifications.php';
 
 $profile_image = $_SESSION['profile_image'] ?? '';
 if (empty($profile_image) && isset($_SESSION['user_id']) && isset($conn)) {
